@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import 'app_data.dart';
+import 'layout_connected.dart';
+import 'layout_connecting.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -15,12 +17,13 @@ class AppState extends State<App> {
   // Definir el contingut del widget 'App'
   Widget _setLayout(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
-
+    
+    print(appData.connectionStatus);
     switch (appData.connectionStatus) {
       case ConnectionStatus.connected:
-        //return const LayoutConnected();
+        return const LayoutConnected();
       case ConnectionStatus.connecting:
-        //return const LayoutConnecting();
+        return const LayoutConnecting();
       default:
         return const LayoutConnection();
     }
