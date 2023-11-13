@@ -16,6 +16,7 @@ class AppData with ChangeNotifier {
 
   String ip = "";
   String message = "";
+  String text = "";
 
   Future<void> connectToServer() async {
     connectionStatus = ConnectionStatus.connecting;
@@ -34,5 +35,18 @@ class AppData with ChangeNotifier {
           }
         }
     );
+  }
+
+  privateMessage(String msg) {
+    final message = {
+      'platform': "Flutter",
+      'text': text
+    };
+    _socketClient!.sink.add(jsonEncode(message));
+  }
+
+  send(String msg) {
+    privateMessage(msg);
+
   }
 }
