@@ -13,7 +13,6 @@ class LayoutConnection extends StatefulWidget {
 
 class _LayoutDisconnectedState extends State<LayoutConnection> {
   final _ipController = TextEditingController();
-  final _messageController = TextEditingController();
 
   Widget _buildTextFormField(
     String label,
@@ -50,7 +49,6 @@ class _LayoutDisconnectedState extends State<LayoutConnection> {
           const SizedBox(height: 50),
           _buildTextFormField("Server IP", "", _ipController),
           const SizedBox(height: 20),
-          _buildTextFormField("Message", "", _messageController),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
               width: 96,
@@ -58,7 +56,6 @@ class _LayoutDisconnectedState extends State<LayoutConnection> {
               child: CupertinoButton.filled(
                 onPressed: () {
                   appData.ip = _ipController.text;
-                  appData.message = _messageController.text;
                   appData.connectToServer();
                 },
                 padding: EdgeInsets.zero,
