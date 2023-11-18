@@ -41,33 +41,92 @@ class _LayoutConnectedState extends State<LayoutConnected> {
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text("Conected"),
+        middle: Text("Connected"),
       ),
-      child: ListView(
-        padding: const EdgeInsets.all(20),
+      child: Row(
         children: [
-          const SizedBox(height: 50),
-          _buildTextFormField("message", "hi!", _messageController),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            SizedBox(
-              width: 96,
-              height: 32,
-              child: CupertinoButton.filled(
-                onPressed: () {
-                  appData.text = _messageController.text;
-                  appData.send(appData.text);
-                },
-                padding: EdgeInsets.zero,
-                child: const Text(
-                  "Send",
-                  style: TextStyle(
-                    fontSize: 14,
-                  ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                const SizedBox(height: 50),
+                _buildTextFormField("message", "hi!", _messageController),
+                     
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 96,
+                      height: 32,
+                      child: CupertinoButton.filled(
+                        onPressed: () {
+                          appData.text = _messageController.text;
+                          appData.send(appData.text);
+                          
+                          // Mirar si el nuevo mensaje es repetido y sino añadirlo a la lista de mensajes
+                          if (appData.modifyListOfMessages(appData.text)) {
+                            setState(() {});
+                          }
+                          print(appData.messagesAsList);
+                        },
+                        padding: EdgeInsets.zero,
+                        child: const Text(
+                          "Send",
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 50),
+                    const Text(
+                      "Pick an Image from the System"
+                    ),
+                    CupertinoButton(
+                      onPressed: () async {
+                        print("Esocge imagen..");
+                      },
+                      child: const Text("Choose File"),
+                    ),
+                  ],
+                ),
+                
+              ],
             ),
-          ]),
 
+            
+          ),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: appData.messagesAsList.length,
+              itemBuilder: (context, index) {
+                Map<String, dynamic> jsonObject = appData.messagesAsList[index];
+                String date = jsonObject['date'];
+                String OnTaptext = jsonObject['text'];
+                String wholeTile = 'Date: $date | Text: $OnTaptext';
+        
+                return CupertinoListTile(
+                  title: Text(wholeTile),
+                  onTap: () async {
+                    // Cuando tapeas elemento lista
+                    appData.text = OnTaptext;
+                    String textToSend = appData.text;
+                    bool toSend = await appData.boolYesNoDialog(context, "Send Message", "Would you like to send again [ $textToSend ]?");
+                    if (toSend) {
+                      appData.send(appData.text);
+                    }
+                
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

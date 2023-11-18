@@ -18,6 +18,10 @@ class AppState extends State<App> {
   Widget _setLayout(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
     
+    // Carreguem la llista a AppData amb els missatges en memoria
+    appData.createFileIfNotExists();
+    appData.readJson();
+
     print(appData.connectionStatus);
     switch (appData.connectionStatus) {
       case ConnectionStatus.connected:

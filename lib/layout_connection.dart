@@ -47,7 +47,7 @@ class _LayoutDisconnectedState extends State<LayoutConnection> {
         padding: const EdgeInsets.all(20),
         children: [
           const SizedBox(height: 50),
-          _buildTextFormField("Server IP", "", _ipController),
+          _buildTextFormField("Server IP:Port", "", _ipController),
           const SizedBox(height: 20),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
