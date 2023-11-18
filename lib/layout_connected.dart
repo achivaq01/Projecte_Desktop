@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:file_selector/file_selector.dart';
 
 import 'app_data.dart';
 
@@ -84,15 +87,37 @@ class _LayoutConnectedState extends State<LayoutConnected> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 50),
-                    const Text(
-                      "Pick an Image from the System"
+                    Text(
+                      "Pick an Image from the System: ${appData.selectImagePath}"
                     ),
                     CupertinoButton(
                       onPressed: () async {
-                        print("Esocge imagen..");
+                        print("Escogiendo imagen...");
+                        const XTypeGroup typeGroup = XTypeGroup(
+                          label: 'images',
+                          extensions: <String>['jpg', 'png'],
+                        );
+                        XFile? imagFile =
+                            await openFile(acceptedTypeGroups: <XTypeGroup>[typeGroup]);
+                        if (imagFile != null) {
+                          final FileStat fileStat = await File(imagFile.path).stat();
+                           if (fileStat.type != FileSystemEntityType.directory) {
+                            print("imagen valida");
+                            appData.selectImagePath = imagFile.path;
+                            setState(() {
+                              
+                            });
+                          }
+                        }
                       },
                       child: const Text("Choose File"),
                     ),
+                    CupertinoButton(
+                      child: const Text("Send Image"), 
+                      onPressed: () async {
+                        appData.sendImageJson();
+                      }
+                      )
                   ],
                 ),
                 

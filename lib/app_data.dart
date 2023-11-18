@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:web_socket_channel/io.dart';
@@ -21,6 +22,7 @@ class AppData with ChangeNotifier {
   String ip = "";
   String message = "";
   String text = "";
+  String selectImagePath = "";
 
   List<dynamic> messagesAsList = List.empty();
 
@@ -152,5 +154,21 @@ class AppData with ChangeNotifier {
       });
 
       return result;
+  }
+  Future<void> sendImageJson() async {
+    Future<bool> imageExists = File(selectImagePath).exists();
+    if (await imageExists) {
+      File imageFile = File(selectImagePath);
+      List<int> imageBytes = imageFile.readAsBytesSync();
+      String base64Img = base64Encode(imageBytes);
+
+      // Enviar la imagen via JSON
+      final message = {
+      'type':'image',
+      'img':base64Img
+      };
+      print("Se envio la imagen: $selectImagePath");
+      _socketClient!.sink.add(jsonEncode(message));
+    }
   }
 }
