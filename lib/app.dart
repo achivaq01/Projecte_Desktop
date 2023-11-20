@@ -18,9 +18,16 @@ class AppState extends State<App> {
   Widget _setLayout(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
     
-    // Carreguem la llista a AppData amb els missatges en memoria
+    // Carreguem la llista a AppData amb els missatges i imatges en memoria
     appData.createFileIfNotExists();
     appData.readJson();
+    appData.createOrAccesImageFile();
+    appData.readImageJson();
+
+    // Para ir a galeria
+    if (appData.onGallery) {
+      print("Cambio a galeria");
+    }
 
     print(appData.connectionStatus);
     switch (appData.connectionStatus) {

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:web_socket_channel/io.dart';
@@ -24,7 +23,10 @@ class AppData with ChangeNotifier {
   String text = "";
   String selectImagePath = "";
 
+  bool onGallery = false;
+
   List<dynamic> messagesAsList = List.empty();
+  List<dynamic> imagesAsList = List.empty();
 
   Future<void> connectToServer() async {
     connectionStatus = ConnectionStatus.connecting;
@@ -93,10 +95,17 @@ class AppData with ChangeNotifier {
   void readJson() async {
     File file = await _localFile;
     String jsonString = file.readAsStringSync();
-    print(jsonString);
 
     messagesAsList = jsonDecode(jsonString);
 
+  }
+
+  void readImageJson() async {
+    final directory = await getApplicationDocumentsDirectory();
+    File imagesJson = File('${directory.path}/imageGallery.json');
+    String jsonString = imagesJson.readAsStringSync();
+
+    imagesAsList = jsonDecode(jsonString);
   }
 
   bool modifyListOfMessages(String newString) {
@@ -155,6 +164,38 @@ class AppData with ChangeNotifier {
 
       return result;
   }
+
+  Future<void> createOrAccesImageFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    File imagesJson = File('${directory.path}/imageGallery.json');
+
+  // Check if the file exists
+  if (!await imagesJson.exists()) {
+    // If the file doesn't exist, create it and write an empty JSON array
+    await imagesJson.create();
+    await imagesJson.writeAsString('[]');
+    print("Json de imagenes creado");
+  }
+  }
+
+  void canSaveImageLocally(Map<String, dynamic> imageAsMap) async {
+      for (var jsonObject in imagesAsList) {
+        if (jsonObject['img'] == imageAsMap['img']) {
+          return;
+        }
+      }
+      imagesAsList.add(imageAsMap);
+      // En cas de no trobar un string similar retorna True i l'afegeix tant en RAM com en l'arxiu Json de documents
+      final directory = await getApplicationDocumentsDirectory();
+
+      String jsonString = jsonEncode(imagesAsList);
+      File imagesJson = File('${directory.path}/imageGallery.json');
+      // Write the JSON string to the file
+      imagesJson.writeAsString(jsonString);
+      print("Nueva imagen en JSON");
+
+  }
+
   Future<void> sendImageJson() async {
     Future<bool> imageExists = File(selectImagePath).exists();
     if (await imageExists) {
@@ -169,6 +210,9 @@ class AppData with ChangeNotifier {
       };
       print("Se envio la imagen: $selectImagePath");
       _socketClient!.sink.add(jsonEncode(message));
+
+      // Guardar imagen en lista para galeria si no es repe
+      canSaveImageLocally(message);
     }
   }
 }
