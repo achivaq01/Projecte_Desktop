@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'app_data.dart';
 import 'layout_connected.dart';
 import 'layout_connecting.dart';
+import 'layout_login.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -35,6 +36,8 @@ class AppState extends State<App> {
         return const LayoutConnected();
       case ConnectionStatus.connecting:
         return const LayoutConnecting();
+      case ConnectionStatus.login:
+        return const LoginPage();
       default:
         return const LayoutConnection();
     }

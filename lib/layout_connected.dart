@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:file_selector/file_selector.dart';
+import 'layout_gallery.dart';
 
 import 'app_data.dart';
 
@@ -117,8 +118,22 @@ class _LayoutConnectedState extends State<LayoutConnected> {
                       onPressed: () async {
                         appData.sendImageJson();
                       }
-                      )
-                  ],
+                      ),
+                    CupertinoButton.filled(
+                      onPressed: () {  
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => const LayoutGallery(),
+                            ),
+                          );
+                      },
+                    child: const Text(
+                          "Gallery",
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),),
+                )],
                 ),
                 
               ],

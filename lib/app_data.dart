@@ -12,6 +12,7 @@ enum ConnectionStatus {
   disconnecting,
   connecting,
   connected,
+  login,
 }
 
 class AppData with ChangeNotifier {
@@ -22,8 +23,10 @@ class AppData with ChangeNotifier {
   String message = "";
   String text = "";
   String selectImagePath = "";
+  String userId = "";
 
   bool onGallery = false;
+  bool showErrorLoginMessage = false;
 
   List<dynamic> messagesAsList = List.empty();
   List<dynamic> imagesAsList = List.empty();
@@ -34,24 +37,59 @@ class AppData with ChangeNotifier {
     
     await Future.delayed(const Duration(seconds: 1));
 
-    _socketClient = IOWebSocketChannel.connect("ws://$ip");
+    _socketClient = IOWebSocketChannel.connect("ws://$ip:8888");
     _socketClient!.stream.listen(
-        (message) {
+        (message) {     
           final data = jsonDecode(message);
-
+          print(data);
+          String jsonType = data["type"];
+          switch (jsonType) {
+            case "connected":
+                print("ME ESTAN ENVIANDO UN CONECTED 8=====================D");
+                userId = data["id"];
+                connectionStatus = ConnectionStatus.login;
+                notifyListeners();
+              break;
+            case "login":
+                if (data["success"] == true) {
+                  connectionStatus = ConnectionStatus.connected;
+                  notifyListeners();
+                } else {
+                  print("NO FUE MANIN");
+                  showErrorLoginMessage = true;
+                  notifyListeners();
+                }
+            default:
+          }
+          /*
           if(connectionStatus != ConnectionStatus.connected) {
             connectionStatus = ConnectionStatus.connected;
             //mensaje inicial al conectarse
             messageOnConnect();
             notifyListeners();
-          }
-        }
+          }*/
+          /*if (connectionStatus == ConnectionStatus.connecting) {
+            print("going to login");
+            connectionStatus = ConnectionStatus.login;
+            notifyListeners();
+          }*/
+        },onDone: () {
+          print("Conexion Websocket cortada");
+          connectionStatus = ConnectionStatus.disconnected;
+          notifyListeners();
+        },
+        onError: (error) {
+          print("WebSocket Error:");
+          
+          connectionStatus = ConnectionStatus.disconnected;
+          notifyListeners();
+        },
     );
   }
 
   privateMessage(String msg) {
     final message = {
-      'platform': "Flutter",
+      'type': "string",
       'text': text
     };
     print(message);
@@ -60,7 +98,7 @@ class AppData with ChangeNotifier {
 
   messageOnConnect() {
     final message = {
-      'type':'platform',
+      'type':'connect',
       'platform':'flutter'
     };
     _socketClient!.sink.add(jsonEncode(message));
@@ -69,6 +107,10 @@ class AppData with ChangeNotifier {
   send(String msg) {
     privateMessage(msg);
     print("Se envio: $msg");
+  }
+
+  sendAnyJson(Map<String, dynamic> message) {
+    _socketClient!.sink.add(jsonEncode(message));
   }
 
   Future<String> get _localPath async {
@@ -214,5 +256,15 @@ class AppData with ChangeNotifier {
       // Guardar imagen en lista para galeria si no es repe
       canSaveImageLocally(message);
     }
+  }
+
+  void sendGalleryImage(String base64String) {
+    // Enviar la imagen via JSON
+    final message = {
+    'type':'image',
+    'img':base64String
+    };
+    print("Se envio la imagen desde la galeria");
+    _socketClient!.sink.add(jsonEncode(message));
   }
 }
