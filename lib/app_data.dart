@@ -45,7 +45,7 @@ class AppData with ChangeNotifier {
           String jsonType = data["type"];
           switch (jsonType) {
             case "connected":
-                print("ME ESTAN ENVIANDO UN CONECTED 8=====================D");
+                print("En contected");
                 userId = data["id"];
                 connectionStatus = ConnectionStatus.login;
                 notifyListeners();
