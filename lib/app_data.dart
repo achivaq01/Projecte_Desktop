@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'layout_connected.dart';
 
 enum ConnectionStatus {
   disconnected,
@@ -14,6 +14,12 @@ enum ConnectionStatus {
   connected,
   login,
 }
+
+typedef ToastCallback = void Function({
+    BuildContext? context,
+    String? title,
+    Duration? autoCloseDuration,
+  });
 
 class AppData with ChangeNotifier {
   IOWebSocketChannel? _socketClient;
@@ -25,12 +31,15 @@ class AppData with ChangeNotifier {
   String selectImagePath = "";
   String userId = "";
 
+  List<dynamic> connectedUsers = List.empty();
+
   bool onGallery = false;
   bool showErrorLoginMessage = false;
 
   List<dynamic> messagesAsList = List.empty();
   List<dynamic> imagesAsList = List.empty();
 
+  // WebSocket management
   Future<void> connectToServer() async {
     connectionStatus = ConnectionStatus.connecting;
     notifyListeners();
@@ -52,6 +61,7 @@ class AppData with ChangeNotifier {
               break;
             case "login":
                 if (data["success"] == true) {
+                  showErrorLoginMessage = false;
                   connectionStatus = ConnectionStatus.connected;
                   notifyListeners();
                 } else {
@@ -59,20 +69,23 @@ class AppData with ChangeNotifier {
                   showErrorLoginMessage = true;
                   notifyListeners();
                 }
+              break;
+            case "list":
+                print("RECOJO LISTA DE PERSONAS");
+                connectedUsers = data["list"];
+                notifyListeners();
+              break;
+            case "new message":
+                print("New message");
+                if (connectionStatus == ConnectionStatus.connected) {
+                  print("En pantalla contected, se puede mostrar toast");
+                  ShowFlutterToast singletonToast = ShowFlutterToast.instance;
+                  singletonToast.showToastFunction("New message", "There is a new message from user ${data['id']}");
+                }
+              break;
             default:
           }
-          /*
-          if(connectionStatus != ConnectionStatus.connected) {
-            connectionStatus = ConnectionStatus.connected;
-            //mensaje inicial al conectarse
-            messageOnConnect();
-            notifyListeners();
-          }*/
-          /*if (connectionStatus == ConnectionStatus.connecting) {
-            print("going to login");
-            connectionStatus = ConnectionStatus.login;
-            notifyListeners();
-          }*/
+          
         },onDone: () {
           print("Conexion Websocket cortada");
           connectionStatus = ConnectionStatus.disconnected;
@@ -267,4 +280,5 @@ class AppData with ChangeNotifier {
     print("Se envio la imagen desde la galeria");
     _socketClient!.sink.add(jsonEncode(message));
   }
+
 }

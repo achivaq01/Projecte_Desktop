@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:file_selector/file_selector.dart';
 import 'layout_gallery.dart';
+import 'package:toastification/toastification.dart';
 
 import 'app_data.dart';
 
@@ -43,9 +44,73 @@ class _LayoutConnectedState extends State<LayoutConnected> {
   Widget build(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
 
+    //Singleton para toast
+    ShowFlutterToast singletonToast = ShowFlutterToast.instance;
+    singletonToast.setContext(context);
+
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text("Connected"),
+      navigationBar:  CupertinoNavigationBar(
+        middle: const Text("Connected"),
+        trailing: CupertinoButton(
+            padding: const EdgeInsets.all(0.0),
+            onPressed: () {  
+              print("Boton para ver personas");
+              showCupertinoDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return CupertinoAlertDialog(
+                    title: const Text("Users"),
+                    content: Container(
+                      height: 200, // Set a specific height for the ListView
+                      child: ListView.builder(
+                        itemCount: appData.connectedUsers.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Center( 
+                            child: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context).style,
+                                children: <TextSpan>[
+                                  const TextSpan(
+                                    text: "User ",
+                                    style: TextStyle(fontWeight: FontWeight.normal),
+                                  ),
+                                  TextSpan(
+                                    text: "'${appData.connectedUsers[index]["id"]}'",
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: CupertinoColors.activeBlue),
+                                  ),
+                                  const TextSpan(
+                                    text: " from platform ",
+                                    style: TextStyle(fontWeight: FontWeight.normal),
+                                  ),
+                                  TextSpan(
+                                    text: "'${appData.connectedUsers[index]["platform"]}'",
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: CupertinoColors.activeBlue),
+                                  ),
+                                ],
+                              ),
+                          ));
+                        },
+                      ),
+                    ),
+                    actions: <Widget>[
+                      CupertinoDialogAction(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          Navigator.pop(context); // Close the dialog
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: const Icon(
+                  CupertinoIcons.sidebar_left,
+                  color:  CupertinoColors.activeBlue,
+
+                  size: 24.0,
+                  semanticLabel: 'Text to announce in accessibility modes',
+            )),
       ),
       child: Row(
         children: [
@@ -71,7 +136,7 @@ class _LayoutConnectedState extends State<LayoutConnected> {
                           if (appData.modifyListOfMessages(appData.text)) {
                             setState(() {});
                           }
-                          print(appData.messagesAsList);
+
                         },
                         padding: EdgeInsets.zero,
                         child: const Text(
@@ -154,7 +219,7 @@ class _LayoutConnectedState extends State<LayoutConnected> {
                 return CupertinoListTile(
                   title: Text(wholeTile),
                   onTap: () async {
-                    // Cuando tapeas elemento lista
+                    
                     appData.text = OnTaptext;
                     String textToSend = appData.text;
                     bool toSend = await appData.boolYesNoDialog(context, "Send Message", "Would you like to send again [ $textToSend ]?");
@@ -173,10 +238,30 @@ class _LayoutConnectedState extends State<LayoutConnected> {
   }
 }
 
+class ShowFlutterToast {
+  ShowFlutterToast._();
 
+  BuildContext? _contextToUse;
 
+  static final ShowFlutterToast _instance = ShowFlutterToast._();
 
+  static ShowFlutterToast get instance => _instance;
 
+  void setContext(BuildContext context) {
+    _instance._contextToUse = context;
+  }
 
-
-
+  void showToastFunction(String toastTile, String toastDescription) {
+    print("Funcion para mostrar toast");
+    if (_contextToUse != null) {
+      toastification.show(
+        context: _contextToUse!,
+        title: toastTile,
+        description: toastDescription,
+        autoCloseDuration: const Duration(seconds: 5),
+      );
+    } else {
+      print('Context is null. Cannot show toast.');
+    }
+  }
+}

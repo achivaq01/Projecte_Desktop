@@ -40,8 +40,8 @@ class _LoginFormState extends State<LoginForm> {
       'platform':'flutter',
       'type': "login",
       'user': username,
-      'password':password
-      //'client': appData.userId
+      'password':password,
+      'id': appData.userId
     };
     print(message);
     appData.sendAnyJson(message);
