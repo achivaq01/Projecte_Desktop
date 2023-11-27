@@ -206,9 +206,11 @@ class _LayoutConnectedState extends State<LayoutConnected> {
 
             
           ),
-
+          
           Expanded(
-            child: ListView.builder(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: ListView.builder(        
               itemCount: appData.messagesAsList.length,
               itemBuilder: (context, index) {
                 Map<String, dynamic> jsonObject = appData.messagesAsList[index];
@@ -230,7 +232,7 @@ class _LayoutConnectedState extends State<LayoutConnected> {
                   },
                 );
               },
-            ),
+            )),
           ),
         ],
       ),

@@ -51,6 +51,7 @@ class AppData with ChangeNotifier {
         (message) {     
           final data = jsonDecode(message);
           print(data);
+          print("================================");
           String jsonType = data["type"];
           switch (jsonType) {
             case "connected":
@@ -59,6 +60,16 @@ class AppData with ChangeNotifier {
                 connectionStatus = ConnectionStatus.login;
                 notifyListeners();
               break;
+            case "new connection":
+              ShowFlutterToast singletonToast = ShowFlutterToast.instance;
+              singletonToast.showToastFunction("User Status", "The user ${data['id']} has connected\n Online: ${connectedUsers.length}");
+              break;
+            case "new disconnection":
+                if (connectionStatus == ConnectionStatus.connected) {
+                  ShowFlutterToast singletonToast = ShowFlutterToast.instance;
+                  singletonToast.showToastFunction("User Status", "The user ${data['id']} has disconnected\n Online: ${connectedUsers.length}");
+                }
+                break;
             case "login":
                 if (data["success"] == true) {
                   showErrorLoginMessage = false;
@@ -71,7 +82,6 @@ class AppData with ChangeNotifier {
                 }
               break;
             case "list":
-                print("RECOJO LISTA DE PERSONAS");
                 connectedUsers = data["list"];
                 notifyListeners();
               break;
