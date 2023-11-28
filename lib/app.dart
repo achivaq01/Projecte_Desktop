@@ -25,7 +25,7 @@ class AppState extends State<App> {
     appData.createOrAccesImageFile();
     appData.readImageJson();
 
-    // Para ir a galeria
+    // Para ir a galeria de imagenes
     if (appData.onGallery) {
       print("Cambio a galeria");
     }
